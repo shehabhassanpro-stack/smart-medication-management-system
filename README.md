@@ -204,14 +204,11 @@ This project was developed in partial fulfillment of the requirements for the **
   - **Dr. Eng. Omaima Goher** (Project Supervisor)
   - **TA. Menna Magdy** (Assistant Supervisor)
 
-### 👨‍💻 Engineering Team:
-1. **Shehab Hassan Ahmed Abdelhaleem** — *Team Lead & Core Software Engineer* (ID: 221256)
-2. **Ahmed Mohamed Fathy Hassan Seddik** (ID: 212417)
-3. **Abdelrahman Hassan Fathy Hassan** (ID: 223274)
-4. **Seif Eldin Ashraf Saeed Abdelkhalek** (ID: 222462)
-5. **Shehab Mostafa Mortada Abdo** (ID: 222678)
-6. **Abdelhameed Abdelhaleem Abdelhameed Mohamed** (ID: 222312)
-7. **Abdelrahman Mohamed Saeed Abdelaziz** (ID: 223412)
+### 👨‍💻 Lead Software Engineer & Project Author:
+- **Shehab Hassan Ahmed Abdelhaleem** (ID: 221256)
+  - *Lead Software Engineer & System Architect*
+  - 🏅 **Ranked 3rd in Graduating Class (Third Honor / الترتيب الثالث على الدفعة)**
+  - *Bachelor of Computer Science and Information Systems — Class of 2026*
 
 ---
 
