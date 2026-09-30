@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 🔐 NETWORK SECURITY CONFIG - Production Grade -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- المسار: android/app/src/main/res/xml/network_security_config.xml -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<network-security-config>
+    
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 🔒 BASE CONFIG - HTTPS Only (Production) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust system certificates -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 🧪 DEBUG CONFIG - Allow localhost for development -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- Trust system AND user certificates in debug -->
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 🌐 DOMAIN CONFIG - Specific trusted domains -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    
+    <!-- Firebase Services -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">firebase.google.com</domain>
+        <domain includeSubdomains="true">firebaseapp.com</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">firestore.googleapis.com</domain>
+        <domain includeSubdomains="true">firebasestorage.googleapis.com</domain>
+        <domain includeSubdomains="true">fcm.googleapis.com</domain>
+    </domain-config>
+
+    <!-- Your Backend API (if any) -->
+    <!-- 
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.yourdomain.com</domain>
+        <pin-set expiration="2025-12-31">
+            <pin digest="SHA-256">your-ssl-pin-here</pin>
+        </pin-set>
+    </domain-config>
+    -->
+
+</network-security-config>

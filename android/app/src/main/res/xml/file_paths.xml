@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 📁 FILE PROVIDER PATHS - For sharing files -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- المسار: android/app/src/main/res/xml/file_paths.xml -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 📂 EXTERNAL STORAGE PATHS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    
+    <!-- External files directory -->
+    <external-files-path
+        name="external_files"
+        path="." />
+
+    <!-- External cache directory -->
+    <external-cache-path
+        name="external_cache"
+        path="." />
+
+    <!-- External media files -->
+    <external-media-path
+        name="external_media"
+        path="." />
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 📁 INTERNAL STORAGE PATHS -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    
+    <!-- Internal files directory -->
+    <files-path
+        name="files"
+        path="." />
+
+    <!-- Internal cache directory -->
+    <cache-path
+        name="cache"
+        path="." />
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 🖼️ SPECIFIC PATHS (for PDFs, Images, etc) -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    
+    <!-- PDF files -->
+    <external-files-path
+        name="pdf_files"
+        path="PDFs/" />
+
+    <!-- Medical reports -->
+    <external-files-path
+        name="reports"
+        path="Reports/" />
+
+    <!-- Images -->
+    <external-files-path
+        name="images"
+        path="Images/" />
+
+    <!-- Documents -->
+    <external-files-path
+        name="documents"
+        path="Documents/" />
+
+</paths>

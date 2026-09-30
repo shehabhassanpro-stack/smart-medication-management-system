@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ✅ NO package attribute here! -->
+    <!-- Namespace is defined in build.gradle.kts: "com.sulta.develop" -->
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 🔐 INTERNET & NETWORK PERMISSIONS (Firebase & API) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 📷 CAMERA PERMISSIONS (QR Scanner) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 🔐 BIOMETRIC AUTHENTICATION (Fingerprint/Face) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 📁 STORAGE PERMISSIONS (PDF, Images, Files) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- Android 12 and below -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"
+        tools:ignore="ScopedStorage" />
+
+    <!-- Android 13+ (Scoped Storage) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 🔔 NOTIFICATION & ALARM PERMISSIONS (Critical for Medicine Reminders) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- Basic notification permission (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- Exact alarm permission (Android 12+) - Required for scheduled notifications -->
+    <!-- On Android 13+, this is denied by default and must be granted by user -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    
+    <!-- Alternative for alarm/calendar apps (auto-granted but requires Play Store approval) -->
+    <!-- Only uncomment if your app is primarily an alarm/calendar app -->
+    <!-- <uses-permission android:name="android.permission.USE_EXACT_ALARM" /> -->
+    
+    <!-- Vibration for notifications -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    
+    <!-- Reschedule alarms after device restart -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    
+    <!-- Keep device awake for alarm delivery -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    
+    <!-- Foreground service for reliable notification delivery (Android 14+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 📞 OPTIONAL: Phone State (Device Info) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 🔍 QUERIES (for external intents) -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <queries>
+        <!-- For opening URLs -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+
+        <!-- For sharing -->
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+
+        <!-- For text processing -->
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT" />
+            <data android:mimeType="text/plain" />
+        </intent>
+
+        <!-- For opening files -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/pdf" />
+        </intent>
+        
+        <!-- For opening Alarms & Reminders settings (Android 12+) -->
+        <intent>
+            <action android:name="android.settings.REQUEST_SCHEDULE_EXACT_ALARM" />
+        </intent>
+    </queries>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 📱 APPLICATION -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <application
+        android:label="Medical Care"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true"
+        android:largeHeap="true"
+        android:hardwareAccelerated="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:usesCleartextTraffic="false"
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="34"
+        tools:ignore="UnusedAttribute">
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 🎯 MAIN ACTIVITY -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            tools:ignore="LockedOrientationActivity">
+
+            <!-- Normal Theme -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+
+            <!-- Main Launcher Intent -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Deep Links (Optional) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="cloudhealth.app" />
+            </intent-filter>
+        </activity>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 🔥 FIREBASE MESSAGING SERVICE (FCM) -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <service
+            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+            android:exported="false"
+            android:directBootAware="true"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 🔔 LOCAL NOTIFICATIONS -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- Scheduled Notification Receiver -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false"
+            tools:ignore="MissingClass" />
+
+        <!-- Boot Completed Receiver - Reschedules alarms after restart -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false"
+            tools:ignore="MissingClass">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+        
+        <!-- Action Broadcast Receiver - Handles notification action buttons -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
+            android:exported="false"
+            tools:ignore="MissingClass" />
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 📷 FILE PROVIDER (for sharing files) -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 🔧 FLUTTER METADATA -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 🔥 FIREBASE CRASHLYTICS -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="true" />
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 📊 FIREBASE ANALYTICS -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="true" />
+            
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 🔔 DEFAULT NOTIFICATION CHANNEL (FCM) -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="medicine_reminders" />
+
+    </application>
+
+</manifest>

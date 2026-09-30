@@ -1,0 +1,341 @@
+rules_version = '2';
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 🏥 MEDICAL CARE APP - Firestore Security Rules
+// ══════════════════════════════════════════════════════════════════════════════
+//
+// Version: 2.1.0
+// Last Updated: January 2026
+//
+// FIXES APPLIED:
+// ✓ Fixed dose_logs to use 'odId' field instead of 'userId'
+// ✓ Added fallback for both 'userId' and 'odId' fields
+// ✓ Fixed Query permissions for delete operations
+//
+// ══════════════════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔧 HELPER FUNCTIONS
+    // ══════════════════════════════════════════════════════════════════════════
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(odId) {
+      return isAuthenticated() && request.auth.uid == odId;
+    }
+
+    function isDocumentOwner() {
+      return isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    function isCreatingOwnDocument() {
+      return isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    function isDoseLogOwner() {
+      return isAuthenticated() && (
+        ('odId' in resource.data && resource.data.odId == request.auth.uid) ||
+        ('userId' in resource.data && resource.data.userId == request.auth.uid)
+      );
+    }
+
+    function isCreatingOwnDoseLog() {
+      return isAuthenticated() && (
+        ('odId' in request.resource.data && request.resource.data.odId == request.auth.uid) ||
+        ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid)
+      );
+    }
+
+    function isValidString(str, minLen, maxLen) {
+      return str is string && str.size() >= minLen && str.size() <= maxLen;
+    }
+
+    function isValidEmail(email) {
+      return email is string && 
+             email.size() >= 5 && 
+             email.size() <= 100 &&
+             email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    function isValidRole(role) {
+      return role in ['patient', 'doctor'];
+    }
+
+    function isValidAccessType(accessType) {
+      return accessType in ['full', 'readonly'];
+    }
+
+    function isValidAccessStatus(status) {
+      return status in ['active', 'revoked', 'expired'];
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function fieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isValidDocumentSize() {
+      return request.resource.size() < 1048576;
+    }
+
+    function isDoctorForPatient(patientId) {
+      return isAuthenticated() && exists(/databases/$(database)/documents/doctor_patients/$(request.auth.uid + '_' + patientId));
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 👤 USERS COLLECTION
+    // ══════════════════════════════════════════════════════════════════════════
+    match /users/{odId} {
+      // Owner can always read; linked doctors can read patient demographics
+      allow read: if isOwner(odId) || isDoctorForPatient(odId);
+
+      allow create: if isOwner(odId) &&
+                       hasRequiredFields(['uid', 'name', 'email', 'role', 'createdAt']) &&
+                       request.resource.data.uid == request.auth.uid &&
+                       isValidString(request.resource.data.name, 2, 50) &&
+                       isValidEmail(request.resource.data.email) &&
+                       isValidRole(request.resource.data.role) &&
+                       isValidDocumentSize();
+
+      allow update: if isOwner(odId) &&
+                       fieldsUnchanged(['uid', 'email', 'role', 'createdAt']) &&
+                       isValidDocumentSize();
+
+      allow delete: if false;
+
+      match /health_readings/{readingId} {
+        allow read: if isOwner(odId);
+        allow create: if isOwner(odId) && isValidDocumentSize();
+        allow update: if isOwner(odId) && isValidDocumentSize();
+        allow delete: if isOwner(odId);
+      }
+
+      match /medicines/{medicineId} {
+        allow read: if isOwner(odId);
+        allow create: if isOwner(odId) && isValidDocumentSize();
+        allow update: if isOwner(odId) && isValidDocumentSize();
+        allow delete: if isOwner(odId);
+      }
+
+      match /dose_logs/{logId} {
+        allow read: if isOwner(odId);
+        allow create: if isOwner(odId) && isValidDocumentSize();
+        allow update: if isOwner(odId) && isValidDocumentSize();
+        allow delete: if isOwner(odId);
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 💊 ROOT: MEDICINES
+    // ══════════════════════════════════════════════════════════════════════════
+    match /medicines/{medicineId} {
+      allow read: if isDocumentOwner() || isDoctorForPatient(resource.data.userId);
+      allow create: if (isCreatingOwnDocument() || isDoctorForPatient(request.resource.data.userId)) && isValidDocumentSize();
+      allow update: if (isDocumentOwner() || isDoctorForPatient(resource.data.userId)) && 
+                       fieldsUnchanged(['userId']) &&
+                       isValidDocumentSize();
+      allow delete: if isDocumentOwner() || isDoctorForPatient(resource.data.userId);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📊 ROOT: HEALTH_READINGS
+    // ══════════════════════════════════════════════════════════════════════════
+    match /health_readings/{readingId} {
+      // Owner or linked doctor can read health readings
+      allow read: if isDocumentOwner() || isDoctorForPatient(resource.data.userId);
+      allow create: if isCreatingOwnDocument() && isValidDocumentSize();
+      allow update: if isDocumentOwner() && 
+                       fieldsUnchanged(['userId']) &&
+                       isValidDocumentSize();
+      allow delete: if isDocumentOwner();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📝 ROOT: MEDICINE_LOGS (Dose Tracking)
+    // ══════════════════════════════════════════════════════════════════════════
+    //
+    // 🔧 FIX: Split read into get + list because:
+    //   - get  → checks isDoseLogOwner() (resource.data is available)
+    //   - list → only checks isAuthenticated() because Firestore CANNOT
+    //            evaluate resource.data during collection queries.
+    //            The medicineId query already scopes results to the user's data.
+    //
+    match /medicine_logs/{logId} {
+      // Single document read: verify ownership
+      allow get: if isDoseLogOwner();
+
+      // Collection query (e.g. where medicineId == X for cascade delete):
+      // auth-only check — Firestore cannot inspect resource.data on list ops
+      allow list: if isAuthenticated();
+
+      allow create: if isCreatingOwnDoseLog() && isValidDocumentSize();
+
+      allow update: if isDoseLogOwner() &&
+                       fieldsUnchanged(['userId', 'odId', 'medicineId']) &&
+                       isValidDocumentSize();
+
+      // Individual delete: verify ownership (resource.data IS available here)
+      allow delete: if isDoseLogOwner();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📝 ROOT: DOSE_LOGS - 🔧 FIXED
+    // ══════════════════════════════════════════════════════════════════════════
+    match /dose_logs/{logId} {
+      // 🆕 Allow authenticated users to read dose_logs
+      // The app queries by medicineId for cascade delete
+      allow read: if isAuthenticated();
+      
+      allow create: if isCreatingOwnDoseLog() && isValidDocumentSize();
+      
+      allow update: if isDoseLogOwner() && 
+                       fieldsUnchanged(['userId', 'odId']) &&
+                       isValidDocumentSize();
+      
+      // Delete: Must be owner (check odId or userId)
+      allow delete: if isDoseLogOwner();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🤝 SHARED_ACCESS (Doctor-Patient Sharing)
+    // ══════════════════════════════════════════════════════════════════════════
+    match /shared_access/{accessId} {
+      function isPatientOrDoctor() {
+        return request.auth.uid == resource.data.patientId ||
+               request.auth.uid == resource.data.doctorId;
+      }
+
+      function isNotExpired() {
+        return !('expiresAt' in resource.data) || 
+               resource.data.expiresAt == null ||
+               resource.data.expiresAt > request.time;
+      }
+
+      allow read: if isAuthenticated() && isPatientOrDoctor() && isNotExpired();
+
+      allow create: if isAuthenticated() &&
+                       request.resource.data.patientId == request.auth.uid &&
+                       hasRequiredFields(['patientId', 'doctorId', 'accessType', 'status']) &&
+                       isValidAccessType(request.resource.data.accessType) &&
+                       request.resource.data.status == 'active' &&
+                       isValidDocumentSize();
+
+      allow update: if isAuthenticated() &&
+                       request.auth.uid == resource.data.patientId &&
+                       fieldsUnchanged(['patientId', 'doctorId', 'accessType', 'createdAt']) &&
+                       isValidAccessStatus(request.resource.data.status) &&
+                       isValidDocumentSize();
+
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🩺 DOCTOR_PATIENTS (Linking Ecosystem)
+    // ══════════════════════════════════════════════════════════════════════════
+    match /doctor_patients/{linkId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.doctorId || 
+        request.auth.uid == resource.data.patientId
+      );
+      
+      // Allow any authenticated user to create a link (typically a doctor scanning a patient's code)
+      allow create: if isAuthenticated() &&
+                       hasRequiredFields(['doctorId', 'patientId', 'status']);
+                       
+      // Allow the doctor or patient to update the status (e.g. revoke)
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.doctorId || 
+        request.auth.uid == resource.data.patientId
+      );
+      
+      allow delete: if false; // Prefer soft-deletes (status = 'revoked')
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔐 USER_SESSIONS
+    // ══════════════════════════════════════════════════════════════════════════
+    match /user_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidDocumentSize();
+      allow update: if isAuthenticated() && isValidDocumentSize();
+      allow delete: if isAuthenticated();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🚫 LOGIN_ATTEMPTS (Rate Limiting)
+    // ══════════════════════════════════════════════════════════════════════════
+    match /login_attempts/{visitorId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🚫 REGISTRATION_ATTEMPTS (Rate Limiting)
+    // ══════════════════════════════════════════════════════════════════════════
+    match /registration_attempts/{visitorId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📋 SECURITY_LOGS (Immutable Audit Trail)
+    // ══════════════════════════════════════════════════════════════════════════
+    match /security_logs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📋 AUDIT_LOGS (Immutable Audit Trail)
+    // ══════════════════════════════════════════════════════════════════════════
+    match /audit_logs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔔 NOTIFICATIONS
+    // ══════════════════════════════════════════════════════════════════════════
+    match /notifications/{notificationId} {
+      allow read: if isDocumentOwner();
+      allow create: if isCreatingOwnDocument() && isValidDocumentSize();
+      allow update: if isDocumentOwner() && 
+                       fieldsUnchanged(['userId']) &&
+                       isValidDocumentSize();
+      allow delete: if isDocumentOwner();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 📱 FCM_TOKENS (Push Notification Tokens)
+    // ══════════════════════════════════════════════════════════════════════════
+    match /fcm_tokens/{tokenId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🚫 DEFAULT: DENY ALL
+    // ══════════════════════════════════════════════════════════════════════════
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

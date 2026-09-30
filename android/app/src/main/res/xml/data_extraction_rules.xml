@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 🔐 DATA EXTRACTION RULES - Android 12+ (API 31+) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- المسار: android/app/src/main/res/xml/data_extraction_rules.xml -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<data-extraction-rules>
+    
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ☁️ CLOUD BACKUP RULES -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <cloud-backup>
+        <!-- Include general app data -->
+        <include domain="sharedpref" path="." />
+        <include domain="database" path="." />
+        <include domain="file" path="." />
+
+        <!-- Exclude sensitive data -->
+        <exclude domain="sharedpref" path="FlutterSecureStorage" />
+        <exclude domain="sharedpref" path="flutter_secure_storage" />
+        <exclude domain="sharedpref" path="auth_tokens.xml" />
+        <exclude domain="sharedpref" path="user_credentials.xml" />
+        <exclude domain="sharedpref" path="biometric_data.xml" />
+        <exclude domain="file" path="cache/" />
+        <exclude domain="file" path="code_cache/" />
+        <exclude domain="file" path="temp/" />
+    </cloud-backup>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 📱 DEVICE TRANSFER RULES -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <device-transfer>
+        <!-- Include general app data for device transfer -->
+        <include domain="sharedpref" path="." />
+        <include domain="database" path="." />
+        <include domain="file" path="." />
+
+        <!-- Exclude sensitive data from device transfer -->
+        <exclude domain="sharedpref" path="FlutterSecureStorage" />
+        <exclude domain="sharedpref" path="flutter_secure_storage" />
+        <exclude domain="sharedpref" path="auth_tokens.xml" />
+        <exclude domain="sharedpref" path="user_credentials.xml" />
+        <exclude domain="sharedpref" path="biometric_data.xml" />
+        <exclude domain="file" path="cache/" />
+    </device-transfer>
+
+</data-extraction-rules>

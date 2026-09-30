@@ -1,0 +1,60 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🏥 Flutter & Android / iOS Enterprise .gitignore
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Miscellaneous & System
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+*.zip
+*.tar.gz
+
+# IDE & Editor files
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+
+# Flutter / Dart build artifacts
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+build/
+/coverage/
+
+# Android build artifacts & Gradle
+.gradle/
+**/.gradle/
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/local.properties
+android/**/local.properties
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Keystores & sensitive credentials
+*.keystore
+*.jks
+key.properties
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json

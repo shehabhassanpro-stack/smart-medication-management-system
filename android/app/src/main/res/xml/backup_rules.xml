@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 💾 BACKUP RULES - Data Security -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- المسار: android/app/src/main/res/xml/backup_rules.xml -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<full-backup-content>
+    
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ✅ INCLUDE - Files to backup -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <include domain="sharedpref" path="." />
+    <include domain="database" path="." />
+    <include domain="file" path="." />
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- ❌ EXCLUDE - Sensitive files NOT to backup -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    
+    <!-- Exclude secure storage (passwords, tokens, biometric data) -->
+    <exclude domain="sharedpref" path="FlutterSecureStorage" />
+    <exclude domain="sharedpref" path="flutter_secure_storage" />
+    
+    <!-- Exclude authentication tokens -->
+    <exclude domain="sharedpref" path="auth_tokens.xml" />
+    <exclude domain="sharedpref" path="user_credentials.xml" />
+    
+    <!-- Exclude biometric data -->
+    <exclude domain="sharedpref" path="biometric_data.xml" />
+    
+    <!-- Exclude cache -->
+    <exclude domain="file" path="cache/" />
+    <exclude domain="file" path="code_cache/" />
+    
+    <!-- Exclude temporary files -->
+    <exclude domain="file" path="temp/" />
+    <exclude domain="file" path="tmp/" />
+
+</full-backup-content>
